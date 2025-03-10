@@ -1,14 +1,14 @@
 # QR Code Scanner
 
-![QR Code Scanner](https://i.ibb.co/com/F43hfDd7/Screenshot-10-3-2025-15168-127-0-0-1.jpg)
-
 A sleek and intuitive **QR Code Scanner** designed for effortless scanning of QR codes through camera capture or image upload. Built with **HTML**, **CSS**, and **JavaScript** (using the **jsQR** library), this app is optimized for both desktop and mobile devices.
 
-## 🚀 Live Demo
+## 🌍 Live Demo
 
-Check out the live demo of the QR Code Scanner:
+🔗 **<a href="https://qrcodescanner-novara.netlify.app/" target="_blank" rel="noopener noreferrer">Try it here!</a>** 
 
-[**QR Code Scanner Demo**](https://qrcodescanner-novara.netlify.app/)
+## 📸 Screenshot
+
+![App Screenshot](https://i.ibb.co.com/F43hfDd7/Screenshot-10-3-2025-15168-127-0-0-1.jpg)
 
 ## 🎨 Features
 
