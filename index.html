@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner</title>
+    <!-- Favicon link with QR code icon -->
+    <link rel="icon" type="image/png" href="https://img.icons8.com/external-smashingstocks-outline-color-smashing-stocks/32/external-qr-code-scan-shopping-and-commerce-smashingstocks-outline-color-smashing-stocks.png" sizes="32x32">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #1e3a8a; /* Dark blue background for checkout-style theme */
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 80vh;
+            padding: 10px;
+            overflow: hidden;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header span {
+            font-size: 1.5em;
+            margin-left: 10px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Subtle shadow for card effect */
+            width: 300px;
+        }
+        #scanner-container {
+            position: relative;
+            border: none;
+            aspect-ratio: 1;
+        }
+        #video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        #canvas {
+            display: none; /* Hidden canvas for QR code processing */
+        }
+        #scanner-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #facc15; /* Yellow scan line */
+            animation: scan-line 1.5s infinite ease-in-out;
+            box-shadow: 0 0 10px #facc15; /* Glow effect for scan line */
+        }
+        @keyframes scan-line {
+            0% { top: 0; }
+            50% { top: 100%; }
+            100% { top: 0; }
+        }
+        #controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+            justify-content: center;
+            width: 100%;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1); /* Semi-transparent background */
+            border-radius: 0 0 15px 15px;
+        }
+        button, input[type="file"]::file-selector-button {
+            padding: 10px 20px;
+            background: linear-gradient(90deg, #3b82f6, #2563eb); /* Gradient button background */
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, background 0.3s ease;
+            flex: 1;
+            min-width: 80px;
+        }
+        button:hover, input[type="file"]::file-selector-button:hover {
+            background: linear-gradient(90deg, #2563eb, #1d4ed8); /* Darker gradient on hover */
+            transform: scale(1.05); /* Slight scale effect on hover */
+        }
+        input[type="file"] {
+            font-size: 0.9em;
+            color: #fff;
+            flex: 1;
+            min-width: 80px;
+        }
+        #result {
+            padding: 15px;
+            border-radius: 0 0 15px 15px;
+            width: 100%;
+            text-align: center;
+            margin-top: 0;
+            background: #000000; /* Black background for result box */
+            color: #ffffff; /* White text for readability */
+        }
+        #result.active {
+            background: #000000; /* Active state background (currently same as default, may need correction) */
+            color: #fff; /* White text on active state */
+        }
+        #result-content {
+            margin-bottom: 10px;
+            word-wrap: break-word;
+        }
+        #result-content a {
+            color: #0e5aff; /* Blue color for links */
+            text-decoration: none;
+        }
+        #result-content a:hover {
+            text-decoration: underline;
+        }
+        #copy-btn, #scan-again-btn {
+            padding: 8px 16px;
+            background: #facc15; /* Yellow background for action buttons */
+            color: #1e3a8a; /* Dark blue text */
+            border: none;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+            display: none;
+            margin-top: 10px;
+        }
+        #copy-btn:hover, #scan-again-btn:hover {
+            background: #eab308; /* Darker yellow on hover */
+            transform: scale(1.05); /* Slight scale effect on hover */
+        }
+        /* Professional Alert Styling */
+        #alert-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff6b6b; /* Red background for error alerts */
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            font-size: 0.9em;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+        #alert-box.visible {
+            display: block;
+            opacity: 1;
+        }
+        #alert-box button {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1em;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        @media (max-width: 500px) {
+            .card {
+                width: 90vw;
+            }
+            #controls {
+                max-width: 90vw;
+                gap: 8px;
+                padding: 8px;
+            }
+            button, input[type="file"]::file-selector-button {
+                padding: 8px 15px;
+                font-size: 0.8em;
+                min-width: 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <span>📷 QR Scanner</span> <!-- Header with QR scanner title -->
+    </div>
+    <div class="card">
+        <div id="scanner-container">
+            <video id="video" autoplay playsinline></video> <!-- Video element for camera feed -->
+            <canvas id="canvas"></canvas> <!-- Canvas for QR code processing -->
+        </div>
+        <div id="controls">
+            <input type="file" id="image-upload" accept="image/*"> <!-- File input for image upload -->
+            <button id="start-btn">Start</button> <!-- Button to start camera -->
+            <button id="stop-btn">Stop</button> <!-- Button to stop camera -->
+        </div>
+        <div id="result">
+            <div id="result-content">Scan a QR code...</div> <!-- Area to display scanned result -->
+            <button id="copy-btn">Copy</button> <!-- Button to copy result -->
+            <button id="scan-again-btn">Scan Again</button> <!-- Button to reset scan -->
+        </div>
+    </div>
+    <div id="alert-box"><span id="alert-message"></span><button onclick="this.parentElement.classList.remove('visible')">×</button></div> <!-- Alert box with close button -->
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"> <!-- Google Fonts link for Poppins -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script> <!-- jsQR library for QR code detection -->
+    <script>
+        const video = document.getElementById('video'); // Video element reference
+        const canvas = document.getElementById('canvas'); // Canvas element reference
+        const ctx = canvas.getContext('2d'); // 2D rendering context for canvas
+        const resultDiv = document.getElementById('result'); // Result div reference
+        const resultContent = document.getElementById('result-content'); // Result content area
+        const copyBtn = document.getElementById('copy-btn'); // Copy button
+        const scanAgainBtn = document.getElementById('scan-again-btn'); // Scan again button
+        const startBtn = document.getElementById('start-btn'); // Start button
+        const stopBtn = document.getElementById('stop-btn'); // Stop button
+        const imageUpload = document.getElementById('image-upload'); // File input
+        const alertBox = document.getElementById('alert-box'); // Alert box
+        const alertMessage = document.getElementById('alert-message'); // Alert message span
+        let stream = null; // Stream object for camera
+        let scanning = false; // Flag to track scanning state
+
+        // Show professional alert message with type (error or success)
+        function showAlert(message, type = 'error') {
+            alertMessage.textContent = message;
+            alertBox.classList.add('visible');
+            if (type === 'success') {
+                alertBox.style.background = '#4ade80'; // Green for success
+            } else {
+                alertBox.style.background = '#ff6b6b'; // Red for error
+            }
+            setTimeout(() => {
+                alertBox.classList.remove('visible'); // Auto-hide after 3 seconds
+            }, 3000);
+        }
+
+        // Reset result and prepare for new scan
+        function resetScan() {
+            resultContent.textContent = 'Scan a QR code...';
+            copyBtn.style.display = 'none';
+            scanAgainBtn.style.display = 'none';
+        }
+
+        // Start camera and scanning
+        function startCamera() {
+            if (scanning) return; // Prevent multiple starts
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                .then(s => {
+                    stream = s;
+                    video.srcObject = stream;
+                    scanning = true;
+                    requestAnimationFrame(tick); // Start scanning loop
+                    resultContent.textContent = 'Scanning for QR codes...';
+                    copyBtn.style.display = 'none';
+                    scanAgainBtn.style.display = 'none';
+                })
+                .catch(err => {
+                    showAlert('Failed to access camera: ' + err.message);
+                    resultContent.textContent = 'Camera not accessible.';
+                    copyBtn.style.display = 'none';
+                    scanAgainBtn.style.display = 'none';
+                });
+        }
+
+        // Stop camera and scanning
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop()); // Stop all tracks
+                video.srcObject = null;
+                stream = null;
+                scanning = false;
+                resultContent.textContent = 'Camera stopped.';
+                copyBtn.style.display = 'none';
+                scanAgainBtn.style.display = 'none';
+            }
+        }
+
+        // Check if the text is a URL
+        function isURL(text) {
+            const urlPattern = /^(https?:\/\/)?([\w-]+(\.[\w-]+)+)([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$/;
+            return urlPattern.test(text);
+        }
+
+        // Display the result with URL detection
+        function displayResult(text) {
+            if (isURL(text)) {
+                resultContent.innerHTML = `<a href="${text}" target="_blank">${text}</a>`;
+            } else {
+                resultContent.textContent = text;
+            }
+            resultDiv.classList.add('active');
+            setTimeout(() => resultDiv.classList.remove('active'), 500); // Temporary highlight
+            copyBtn.style.display = 'inline-block';
+            scanAgainBtn.style.display = 'inline-block';
+        }
+
+        // Preprocess image to enhance QR code detection
+        function preprocessImage(imageData) {
+            const data = imageData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                const gray = 0.2989 * r + 0.5870 * g + 0.1140 * b; // Convert to grayscale
+                data[i] = gray;
+                data[i + 1] = gray;
+                data[i + 2] = gray;
+            }
+            const threshold = 128;
+            for (let i = 0; i < data.length; i += 4) {
+                const gray = data[i];
+                const newValue = gray > threshold ? 255 : 0; // Binarize image
+                data[i] = newValue;
+                data[i + 1] = newValue;
+                data[i + 2] = newValue;
+            }
+            return imageData;
+        }
+
+        // Scan QR code from video (continuous scanning)
+        function tick() {
+            if (!scanning) return;
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                canvas.height = video.videoHeight;
+                canvas.width = video.videoWidth;
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                imageData = preprocessImage(imageData);
+                ctx.putImageData(imageData, 0, 0);
+                const code = jsQR(imageData.data, imageData.width, imageData.height);
+                if (code) {
+                    displayResult(code.data);
+                }
+            }
+            requestAnimationFrame(tick); // Continuous loop
+        }
+
+        // Handle image upload and process QR code
+        imageUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const img = new Image();
+            img.onload = () => {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+                let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                imageData = preprocessImage(imageData);
+                ctx.putImageData(imageData, 0, 0);
+                const code = jsQR(imageData.data, imageData.width, imageData.height);
+                if (code) {
+                    displayResult(code.data);
+                } else {
+                    showAlert('Unable to detect QR code. Please upload a higher contrast image.', 'error');
+                    resultContent.textContent = 'No QR code detected.';
+                    copyBtn.style.display = 'none';
+                    scanAgainBtn.style.display = 'none';
+                }
+            };
+            img.src = URL.createObjectURL(file);
+        });
+
+        // Copy result to clipboard
+        copyBtn.addEventListener('click', () => {
+            const text = resultContent.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                showAlert('Text successfully copied to clipboard!', 'success');
+                copyBtn.textContent = 'Copied!';
+                setTimeout(() => {
+                    copyBtn.textContent = 'Copy';
+                }, 2000);
+            }).catch(err => {
+                showAlert('Failed to copy text to clipboard: ' + err.message, 'error');
+            });
+        });
+
+        // Scan again functionality
+        scanAgainBtn.addEventListener('click', resetScan);
+
+        // Button event listeners
+        startBtn.addEventListener('click', startCamera);
+        stopBtn.addEventListener('click', stopCamera);
+
+        // Initial start
+        startCamera();
+    </script>
+</body>
+</html>
