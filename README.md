@@ -1,31 +1,23 @@
 # QR Code Scanner
 
-![QR Code Scanner Icon](https://i.ibb.co/com/F43hfDd7/Screenshot-10-3-2025-15168-127-0-0-1.jpg)
+![QR Code Scanner](https://i.ibb.co/com/F43hfDd7/Screenshot-10-3-2025-15168-127-0-0-1.jpg)
 
-A sleek, user-friendly QR Code Scanner built with HTML, CSS, and JavaScript (using jsQR). This tool allows users to scan QR codes through their camera or by uploading an image. The app supports continuous scanning, clickable links, and error handling, making it ideal for scanning URLs or Wi-Fi QR codes.
+A sleek and intuitive **QR Code Scanner** designed for effortless scanning of QR codes through camera capture or image upload. Built with **HTML**, **CSS**, and **JavaScript** (using the **jsQR** library), this app is optimized for both desktop and mobile devices.
 
-## Features
+## 🚀 Live Demo
 
-- **Modern Design**: Checkout-style layout with dark blue and yellow accents.
-- **Continuous Scanning**: Scan QR codes as they appear.
-- **Clickable Links**: Quickly navigate to URLs embedded in QR codes.
-- **Error Alerts**: Professional alerts for scan errors or success.
-- **Image Preprocessing**: Improved scanning of low-contrast QR codes.
-- **Mobile Optimized**: Fully responsive for use on mobile devices.
-- **User-Friendly**: Easy-to-use interface with Start/Stop buttons and Scan Again feature.
-- **Favicon**: Custom favicon for a polished look.
+Check out the live demo of the QR Code Scanner:
 
-## Demo
+[**QR Code Scanner Demo**](https://qrcodescanner-novara.netlify.app/)
 
-You can check out the live demo of the QR Code Scanner at the following link:
+## 🎨 Features
 
-[QR Code Scanner Demo](https://qrcodescanner-novara.netlify.app/)
-
-## Installation
-
-To get started with this project locally, follow these steps:
-
-1. **Clone the repository**:
-
-   ```bash
-   git clone https://github.com/your-username/qr-code-scanner.git
+- **Modern Design**: Sleek checkout-style layout with dark blue and yellow accents.
+- **Continuous Scanning**: Scans QR codes continuously without the need to restart.
+- **Clickable Links**: Automatically makes URLs clickable from the scanned QR codes.
+- **Preprocessing for Low-Contrast QR Codes**: Enhanced accuracy for hard-to-read codes.
+- **Mobile-Optimized**: Fully responsive for smooth usage on mobile devices.
+- **Error & Success Alerts**: Professional alerts notifying users of scan status.
+- **Start/Stop Buttons**: Easy control of the scanning process.
+- **Scan Again Feature**: Allows the user to start a new scan without page reload.
+- **Custom Favicon**: Small branding for the app.
